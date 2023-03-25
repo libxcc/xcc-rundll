@@ -18,8 +18,19 @@ bool XConsoleApplication::analysisArg(int _Argc, char** _Argv) noexcept
 		return false;
 	}
 
+	// 动态库
 	memberDynamicPath = _Argv[1];
+#if defined(XCC_SYSTEM_WINDOWS)
+	if(XFileSystem::file::exist(XString::fromAString(_Argv[1])))
+	{
+		memberDynamicPath = XString::fromAString(_Argv[1]);
+	}
+#endif
+
+	// 入口点
 	memberEntryPoint = _Argv[2];
+
+	// 参数
 	for(auto vIndex = 3; vIndex < _Argc; ++vIndex)
 	{
 		memberParamArray.emplace_back(_Argv[vIndex]);
@@ -148,29 +159,40 @@ int XConsoleApplication::call(void* _Func, const XString& _Arg1, const XString& 
 // 执行
 int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 {
+	// 检查参数
 	if(!this->analysisArg(_Argc, _Argv))
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] Invalid parameter", __XFUNCTION__, __XLINE__);
 		return EINVAL;
 	}
 
+	// 检查文件是否存在
+	if(!XFileSystem::path::exist(memberDynamicPath))
+	{
+		XLOG_ERROR(nullptr, u8"[%s : %d] Unable to find dynamic library file", __XFUNCTION__, __XLINE__);
+		return ENOEXEC;
+	}
+
+	// 打开动态库
 	auto		vHandle = XLibrary::dllOpen(memberDynamicPath);
 	if(vHandle == nullptr)
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] File could not be loaded", __XFUNCTION__, __XLINE__);
-		return ENOEXEC;
+		return ENXIO;
 	}
 
+	// 查找入口点
 	auto		vFuncAddress = XLibrary::dllFind(vHandle, memberEntryPoint);
 	if(vFuncAddress == nullptr)
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] The specified entry point was not found", __XFUNCTION__, __XLINE__);
 		XLibrary::dllClose(vHandle);
-		return ENOEXEC;
+		return ESRCH;
 	}
 
+	// 执行程序
 	auto		vSync = XConsoleApplication::call(vFuncAddress, memberParamArray);
 	XLibrary::dllClose(vHandle);
-	XLOG_ERROR(nullptr, u8"[%s : %d] The function is executed and returns %d", __XFUNCTION__, __XLINE__, vSync);
+	XLOG_INFO(nullptr, u8"[%s : %d] Function %s returns %d", __XFUNCTION__, __XLINE__, memberEntryPoint.data(), vSync);
 	return vSync;
 }
