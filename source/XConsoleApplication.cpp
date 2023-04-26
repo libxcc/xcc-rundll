@@ -174,7 +174,7 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	}
 
 	// 打开动态库
-	auto		vHandle = XLibrary::dllOpen(memberDynamicPath);
+	auto		vHandle = xcc::dynamic_library::open(memberDynamicPath);
 	if(vHandle == nullptr)
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] File could not be loaded", __XFUNCTION__, __XLINE__);
@@ -182,17 +182,17 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	}
 
 	// 查找入口点
-	auto		vFuncAddress = XLibrary::dllFind(vHandle, memberEntryPoint);
+	auto		vFuncAddress = xcc::dynamic_library::find(vHandle, memberEntryPoint);
 	if(vFuncAddress == nullptr)
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] The specified entry point was not found", __XFUNCTION__, __XLINE__);
-		XLibrary::dllClose(vHandle);
+		xcc::dynamic_library::close(vHandle);
 		return ESRCH;
 	}
 
 	// 执行程序
 	auto		vSync = XConsoleApplication::call(vFuncAddress, memberParamArray);
-	XLibrary::dllClose(vHandle);
+	xcc::dynamic_library::close(vHandle);
 	XLOG_INFO(nullptr, u8"[%s : %d] Function %s returns %d", __XFUNCTION__, __XLINE__, memberEntryPoint.data(), vSync);
 	return vSync;
 }
