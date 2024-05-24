@@ -30,7 +30,7 @@ message(STATUS "CMAKE_PREFIX_PATH : ${CMAKE_PREFIX_PATH}")
 
 # 设置编译环境
 if (MSVC)
-	add_compile_options(/W4)
+	add_compile_options(/W4 /WX /wd4505)
 else()
 	add_compile_options(-Wall)
 endif()
