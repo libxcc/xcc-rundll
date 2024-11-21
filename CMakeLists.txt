@@ -87,19 +87,6 @@ if(MSVC)
 endif()
 
 
-# 指定可执行程序输出目录
-if(WIN32)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG $ENV{CXX_BINARY}/xcc/windows/debug)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE $ENV{CXX_BINARY}/xcc/windows/release)
-elseif(APPLE)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG $ENV{CXX_BINARY}/xcc/darwin/debug)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE $ENV{CXX_BINARY}/xcc/darwin/release)
-elseif(UNIX)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG $ENV{CXX_BINARY}/xcc/linux/debug)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE $ENV{CXX_BINARY}/xcc/linux/release)
-endif()
-
-
 # 链接库
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	link_libraries(xcc-posix-d)

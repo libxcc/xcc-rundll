@@ -21,7 +21,7 @@ bool XConsoleApplication::analysisArg(int _Argc, char** _Argv) noexcept
 	// 动态库
 	memberDynamicPath = _Argv[1];
 #if defined(XCC_SYSTEM_WINDOWS)
-	if(XFileSystem::file::exist(XString::fromAString(_Argv[1])))
+	if(XFile::exist(XString::fromAString(_Argv[1])))
 	{
 		memberDynamicPath = XString::fromAString(_Argv[1]);
 	}
@@ -167,7 +167,7 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	}
 
 	// 检查文件是否存在
-	if(!XFileSystem::path::exist(memberDynamicPath))
+	if(!XFile::exist(memberDynamicPath))
 	{
 		XLOG_ERROR(nullptr, u8"[%s : %d] Unable to find dynamic library file", __XFUNCTION__, __XLINE__);
 		return ENOEXEC;
