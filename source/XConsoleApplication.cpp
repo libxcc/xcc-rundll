@@ -169,7 +169,7 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	// 检查文件是否存在
 	if(!XFile::exist(memberDynamicPath))
 	{
-		XLOG_ERROR(nullptr, u8"[%s : %d] Unable to find dynamic library file", __XFUNCTION__, __XLINE__);
+		XLOG_ERROR(nullptr, u8"[%s : %d] Unable to find dynamic library file : %s", __XFUNCTION__, __XLINE__, memberDynamicPath.data());
 		return ENOEXEC;
 	}
 
@@ -177,7 +177,8 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	auto		vHandle = XDynamicLibrary::open(memberDynamicPath);
 	if(vHandle == nullptr)
 	{
-		XLOG_ERROR(nullptr, u8"[%s : %d] File could not be loaded", __XFUNCTION__, __XLINE__);
+		auto		vErrorS = XDynamicLibrary::error();
+		XLOG_ERROR(nullptr, u8"[%s : %d] File could not be loaded : %s\n%s", __XFUNCTION__, __XLINE__, memberDynamicPath.data(), vErrorS.data());
 		return ENXIO;
 	}
 
@@ -185,7 +186,7 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	auto		vFuncAddress = XDynamicLibrary::find(vHandle, memberEntryPoint);
 	if(vFuncAddress == nullptr)
 	{
-		XLOG_ERROR(nullptr, u8"[%s : %d] The specified entry point was not found", __XFUNCTION__, __XLINE__);
+		XLOG_ERROR(nullptr, u8"[%s : %d] The specified entry point was not found : %s", __XFUNCTION__, __XLINE__, memberEntryPoint.data());
 		XDynamicLibrary::close(vHandle);
 		return ESRCH;
 	}
@@ -193,6 +194,6 @@ int XConsoleApplication::run(int _Argc, char** _Argv) noexcept
 	// 执行程序
 	auto		vSync = XConsoleApplication::call(vFuncAddress, memberParamArray);
 	XDynamicLibrary::close(vHandle);
-	XLOG_INFO(nullptr, u8"[%s : %d] Function %s returns %d", __XFUNCTION__, __XLINE__, memberEntryPoint.data(), vSync);
+	XLOG_INFO(nullptr, u8"[%s : %d] call %s returns %d", __XFUNCTION__, __XLINE__, memberEntryPoint.data(), vSync);
 	return vSync;
 }
